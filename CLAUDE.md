@@ -29,6 +29,20 @@ Single Node.js process that connects to WhatsApp, routes messages to Claude Agen
 | `/customize` | Adding channels, integrations, changing behavior |
 | `/debug` | Container issues, logs, troubleshooting |
 
+## OpenRouter (Claude CLI from this repo)
+
+Project settings (`.claude/settings.json`) route Claude Code to OpenRouter when you run `claude` from this directory. To supply your API key, create `.claude/settings.local.json` (gitignored):
+
+```json
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "<your-openrouter-api-key>"
+  }
+}
+```
+
+Verify with `/status` inside Claude Code. See [OpenRouter Claude Code integration](https://openrouter.ai/docs/guides/guides/claude-code-integration).
+
 ## Development
 
 Run commands directly—don't tell the user to run them.
