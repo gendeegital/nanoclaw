@@ -15,7 +15,7 @@ import {
   IDLE_TIMEOUT,
   TIMEZONE,
 } from './config.js';
-import { readEnvFile } from './env.js';
+import { readClaudeSettingsEnv, readEnvFile } from './env.js';
 import { resolveGroupFolderPath, resolveGroupIpcPath } from './group-folder.js';
 import { logger } from './logger.js';
 import { CONTAINER_RUNTIME_BIN, readonlyMountArgs, stopContainer } from './container-runtime.js';
@@ -178,12 +178,22 @@ function buildVolumeMounts(
   return mounts;
 }
 
+const LLM_SECRET_KEYS = [
+  'CLAUDE_CODE_OAUTH_TOKEN',
+  'ANTHROPIC_API_KEY',
+  'ANTHROPIC_BASE_URL',
+  'ANTHROPIC_AUTH_TOKEN',
+] as const;
+
 /**
- * Read allowed secrets from .env for passing to the container via stdin.
+ * Read allowed secrets from .claude/settings*.json and .env for passing to the container via stdin.
+ * Project settings (OpenRouter base URL, AUTH_TOKEN, empty API_KEY) are merged first; .env overrides.
  * Secrets are never written to disk or mounted as files.
  */
 function readSecrets(): Record<string, string> {
-  return readEnvFile(['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY']);
+  const fromClaude = readClaudeSettingsEnv();
+  const fromEnv = readEnvFile([...LLM_SECRET_KEYS]);
+  return { ...fromClaude, ...fromEnv };
 }
 
 function buildContainerArgs(mounts: VolumeMount[], containerName: string): string[] {
