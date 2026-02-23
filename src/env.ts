@@ -82,3 +82,33 @@ export function readClaudeSettingsEnv(): Record<string, string> {
 
   return result;
 }
+
+/**
+ * Read "model" from .claude/settings.json and .claude/settings.local.json.
+ * Merges (local overrides project). Returns model if it is a non-empty string.
+ * Used so project-level model selection propagates into containers.
+ */
+export function readClaudeSettingsModel(): string | undefined {
+  const root = process.cwd();
+  let model: string | undefined;
+  for (const name of ['settings.json', 'settings.local.json']) {
+    const filePath = path.join(root, '.claude', name);
+    let content: string;
+    try {
+      content = fs.readFileSync(filePath, 'utf-8');
+    } catch {
+      continue;
+    }
+    let data: { model?: unknown };
+    try {
+      data = JSON.parse(content);
+    } catch (err) {
+      logger.debug({ err, file: filePath }, 'Invalid JSON in Claude settings');
+      continue;
+    }
+    if (data.model != null && typeof data.model === 'string' && data.model.trim() !== '') {
+      model = data.model.trim();
+    }
+  }
+  return model;
+}

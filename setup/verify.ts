@@ -12,6 +12,7 @@ import path from 'path';
 import Database from 'better-sqlite3';
 
 import { STORE_DIR } from '../src/config.js';
+import { readClaudeSettingsEnv } from '../src/env.js';
 import { logger } from '../src/logger.js';
 import { getPlatform, getServiceManager, hasSystemd, isRoot } from './platform.js';
 import { emitStatus } from './status.js';
@@ -87,7 +88,7 @@ export async function run(_args: string[]): Promise<void> {
     }
   }
 
-  // 3. Check credentials
+  // 3. Check credentials (.env or .claude/settings*.json for OpenRouter etc.)
   let credentials = 'missing';
   const envFile = path.join(projectRoot, '.env');
   if (fs.existsSync(envFile)) {
@@ -95,6 +96,14 @@ export async function run(_args: string[]): Promise<void> {
     if (/^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY)=/m.test(envContent)) {
       credentials = 'configured';
     }
+  }
+  if (credentials === 'missing') {
+    const claudeEnv = readClaudeSettingsEnv();
+    const hasAuth =
+      (claudeEnv.ANTHROPIC_AUTH_TOKEN?.trim?.() ?? '') !== '' ||
+      (claudeEnv.ANTHROPIC_API_KEY?.trim?.() ?? '') !== '' ||
+      (claudeEnv.CLAUDE_CODE_OAUTH_TOKEN?.trim?.() ?? '') !== '';
+    if (hasAuth) credentials = 'configured';
   }
 
   // 4. Check WhatsApp auth

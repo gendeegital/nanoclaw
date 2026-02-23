@@ -240,7 +240,7 @@ The token can be extracted from `~/.claude/.credentials.json` if you're logged i
 ANTHROPIC_API_KEY=sk-ant-api03-...
 ```
 
-LLM environment variables can also be set via project `.claude/settings.json` and `.claude/settings.local.json` (e.g. for OpenRouter: `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_API_KEY=""`). Those are merged with `.env` and passed to the container, with `.env` taking precedence.
+LLM environment variables and the **model** setting can also be set via project `.claude/settings.json` and `.claude/settings.local.json` (e.g. for OpenRouter: `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_API_KEY=""`, and `"model": "openai/gpt-4o"`). Env vars are merged with `.env` and passed to the container, with `.env` taking precedence. The `model` value is passed into the container and used as the SDK model option.
 
 Only the authentication variables (`CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`) are extracted from `.env` and from `.claude/settings*.json`, then passed to the container via stdin (never written to disk). This ensures other environment variables in `.env` are not exposed to the agent. This workaround is needed because some container runtimes lose `-e` environment variables when using `-i` (interactive mode with piped stdin).
 

@@ -28,6 +28,8 @@ interface ContainerInput {
   isScheduledTask?: boolean;
   assistantName?: string;
   secrets?: Record<string, string>;
+  /** Model from project .claude/settings*.json (e.g. OpenRouter model id). */
+  model?: string;
 }
 
 interface ContainerOutput {
@@ -435,6 +437,7 @@ async function runQuery(
         'mcp__nanoclaw__*'
       ],
       env: sdkEnv,
+      ...(containerInput.model ? { model: containerInput.model } : {}),
       permissionMode: 'bypassPermissions',
       allowDangerouslySkipPermissions: true,
       settingSources: ['project', 'user'],
